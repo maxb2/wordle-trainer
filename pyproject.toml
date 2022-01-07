@@ -9,6 +9,9 @@ homepage = "https://github.com/maxb2/wordle-trainer"
 repository = "https://github.com/maxb2/wordle-trainer"
 include = ['poetry.lock']
 
+[tool.poetry.scripts]
+wordle-trainer = 'wordle_trainer.wordle:app'
+
 [tool.poetry.dependencies]
 python = "^3.9.6"
 typer = "^0.4.0"

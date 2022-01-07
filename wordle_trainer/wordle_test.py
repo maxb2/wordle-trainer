@@ -3,8 +3,8 @@
 
 import pytest
 
-from .todo import todo
+import wordle_trainer.wordle as wordle
 
 
-def test_todo():
-    assert todo(True) is True
+def test_wordle():
+    assert True
