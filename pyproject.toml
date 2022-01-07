@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "makenew-pypackage"
-version = "3.14.0"
-description = "Package skeleton for a Python module."
-authors = ["Evan Sosenko <razorx@evansosenko.com>"]
+name = "wordle-trainer"
+version = "0.0.0"
+description = "A cli wordle clone that gives you hints as you play."
+authors = ["Matthew Anderson <matt@manderscience.com>"]
 license = "MIT"
 readme = "README.rst"
-homepage = "https://github.com/makenew/pypackage"
-repository = "https://github.com/makenew/pypackage"
+homepage = "https://github.com/maxb2/wordle-trainer"
+repository = "https://github.com/maxb2/wordle-trainer"
 include = ['poetry.lock']
 
 [tool.poetry.dependencies]
