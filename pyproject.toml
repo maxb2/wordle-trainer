@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wordle-trainer"
-version = "0.0.0"
+version = "0.0.1"
 description = "A cli wordle clone that gives you hints as you play."
 authors = ["Matthew Anderson <matt@manderscience.com>"]
 license = "MIT"
