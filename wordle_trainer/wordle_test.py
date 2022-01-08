@@ -3,7 +3,7 @@
 
 import pytest
 
-import wordle_trainer.wordle as wordle
+from wordle_trainer import wordle
 
 
 def test_wordle():

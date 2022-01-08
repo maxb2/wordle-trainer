@@ -1,3 +1,6 @@
+"""
+wordle-trainer
+"""
 import os
 import json
 from enum import Enum
@@ -9,8 +12,8 @@ import typer
 
 from wordle_trainer.wordle_dictionary import wordle_dictionary
 
-_alphabet = "abcdefghijklmnopqrstuvwxyz"
-_alpha_array = [c for c in _alphabet]
+ALPHABET = "abcdefghijklmnopqrstuvwxyz"
+ALPHA_ARRAY = list(ALPHABET)
 
 _words_dictionary = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "words_dictionary.json")
@@ -18,12 +21,20 @@ _words_dictionary = os.path.abspath(
 
 
 class Hints(Enum):
-    exclude = "red"
-    include = "yellow"
-    match = "green"
+    """
+    Hints enum
+    """
+
+    EXCLUDE = "red"
+    INCLUDE = "yellow"
+    MATCH = "green"
 
 
-class Hint:
+class Hint:  # pylint: disable=too-few-public-methods
+    """
+    Hint class
+    """
+
     def __init__(self, kind, position, letter):
         self.kind = kind
         self.position = position
@@ -33,8 +44,12 @@ class Hint:
         return f'Hint({self.kind},{self.position},"{self.letter}")'
 
 
-class Wordle:
-    def __init__(
+class Wordle:  # pylint: disable=too-many-instance-attributes
+    """
+    Wordle class
+    """
+
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         length=5,
         answer=None,
@@ -60,46 +75,57 @@ class Wordle:
         assert self.answer in self.word_list
         self.hints = []
         self.turns = turns
-        self.alpha_array = copy(_alpha_array)
-        self.alphabet = copy(_alphabet)
+        self.alpha_array = copy(ALPHA_ARRAY)
+        self.alphabet = copy(ALPHABET)
         self.hint_strings = []
         self.word_lists = []
         self.show_hints = show_hints
 
     def update_alphabet(self):
+        """
+        update_alphabet
+        """
         if self.hints:
             for hint in sorted(
-                self.hints, key=lambda h: 1 if h.kind == Hints.match else 0
+                self.hints, key=lambda h: 1 if h.kind == Hints.MATCH else 0
             ):
-                index = _alpha_array.index(hint.letter)
+                index = ALPHA_ARRAY.index(hint.letter)
                 self.alpha_array[index] = typer.style(
                     hint.letter, bg=hint.kind.value, fg="black"
                 )
             self.alphabet = "".join(self.alpha_array)
 
     def print_board(self, print_hints=True):
+        """
+        print_board
+        """
         typer.clear()
         typer.echo("W O R D L E")
         typer.echo()
         typer.echo(self.alphabet)
         typer.echo()
-        for h, l in zip(self.hint_strings, [len(x) for x in self.word_lists]):
-            typer.echo(f"{h}   {l} words remaining")
+        for hint, length in zip(self.hint_strings, [len(x) for x in self.word_lists]):
+            typer.echo(f"{hint}   {length} words remaining")
         if print_hints and self.show_hints > 0 and self.word_lists:
             typer.echo(
-                f'Hints: {" ".join(self.word_lists[-1][0:min(self.show_hints,len(self.word_lists[-1]))])}{"..." if len(self.word_lists[-1]) > self.show_hints else ""}'
+                f'Hints: {" ".join(self.word_lists[-1][0:min(self.show_hints,len(self.word_lists[-1]))])}{"..." if len(self.word_lists[-1]) > self.show_hints else ""}'  # pylint: disable=line-too-long
             )
 
     def hint_string(self, hints):
-        if hints:
-            arr = [""] * self.length
-            for hint in hints:
-                arr[hint.position] = typer.style(
-                    hint.letter, bg=hint.kind.value, fg="black"
-                )
-            return "".join(arr)
+        """
+        hint_string
+        """
+        arr = [""] * self.length
+        for hint in hints:
+            arr[hint.position] = typer.style(
+                hint.letter, bg=hint.kind.value, fg="black"
+            )
+        return "".join(arr)
 
     def update_hints(self, hints):
+        """
+        update_hints
+        """
         self.hints.extend(hints)
         self.word_lists.append(
             filter_word_list(
@@ -110,17 +136,26 @@ class Wordle:
         self.hint_strings.append(self.hint_string(hints))
 
     def guess(self, word):
+        """
+        guess
+        """
         hints = get_word_hints(self.answer, word)
         self.update_hints(hints)
 
     def reverse_guess(self, word, user_hint):
-        hint_char_map = {"e": Hints.exclude, "i": Hints.include, "m": Hints.match}
+        """
+        reverse_guess
+        """
+        hint_char_map = {"e": Hints.EXCLUDE, "i": Hints.INCLUDE, "m": Hints.MATCH}
         hints = [""] * self.length
         for i in range(self.length):
             hints[i] = Hint(hint_char_map[user_hint[i]], i, word[i])
         self.update_hints(hints)
 
-    def play(self, reverse=False):
+    def play(self):
+        """
+        play
+        """
         turn = 1
         done = False
         length_message = f"Please enter a {self.length}-letter word"
@@ -134,8 +169,8 @@ class Wordle:
             if len(guess) != self.length:
                 extra_message = length_message
                 continue
-            elif guess not in self.word_list:
-                extra_message = f"Please enter a valid word"
+            if guess not in self.word_list:
+                extra_message = "Please enter a valid word"
                 continue
             self.guess(guess)
 
@@ -152,6 +187,9 @@ class Wordle:
             typer.echo(f"Answer: {self.answer}")
 
     def reverse_play(self):
+        """
+        reverse_play
+        """
         turn = 1
         done = False
         length_message = f"Please enter a {self.length}-letter word"
@@ -166,10 +204,10 @@ class Wordle:
             if len(guess) != self.length:
                 extra_message = length_message
                 continue
-            elif guess not in self.word_list:
-                extra_message = f"Please enter a valid word"
+            if guess not in self.word_list:
+                extra_message = "Please enter a valid word"
                 continue
-            elif len(user_hint) != self.length:
+            if len(user_hint) != self.length:
                 extra_message = length_message
                 continue
             self.reverse_guess(guess, user_hint)
@@ -186,6 +224,9 @@ class Wordle:
 
 
 def get_word_hints(answer, guess):
+    """
+    get_word_hints
+    """
     length = len(guess)
     if len(answer) != length:
         raise Exception(
@@ -194,21 +235,24 @@ def get_word_hints(answer, guess):
     hints = []
     for i in range(length):
         if guess[i] == answer[i]:
-            hints.append(Hint(Hints.match, i, guess[i]))
+            hints.append(Hint(Hints.MATCH, i, guess[i]))
         elif guess[i] in answer:
-            hints.append(Hint(Hints.include, i, guess[i]))
+            hints.append(Hint(Hints.INCLUDE, i, guess[i]))
         else:
-            hints.append(Hint(Hints.exclude, i, guess[i]))
+            hints.append(Hint(Hints.EXCLUDE, i, guess[i]))
     return hints
 
 
 def is_valid_guess(word, hint=None):
+    """
+    is_valid_guess
+    """
     if hint:
-        if hint.kind == Hints.match and (word[hint.position] != hint.letter):
+        if hint.kind == Hints.MATCH and (word[hint.position] != hint.letter):
             return False
-        elif hint.kind == Hints.exclude and (hint.letter in word):
+        if hint.kind == Hints.EXCLUDE and (hint.letter in word):
             return False
-        elif hint.kind == Hints.include and (
+        if hint.kind == Hints.INCLUDE and (
             (hint.letter not in word) or (word[hint.position] == hint.letter)
         ):
             return False
@@ -216,6 +260,9 @@ def is_valid_guess(word, hint=None):
 
 
 def hints_filter(word, hints):
+    """
+    hints_filter
+    """
     for hint in hints:
         if not is_valid_guess(word, hint=hint):
             return False
@@ -223,20 +270,29 @@ def hints_filter(word, hints):
 
 
 def load_words_dict(fname):
-    with open(fname, "r") as f:
-        word_dict = json.load(f)
+    """
+    load_words_dict
+    """
+    with open(fname, "r", encoding="utf-8") as file_obj:
+        word_dict = json.load(file_obj)
     return [*word_dict]
 
 
 def load_wordle_dict(fname):
-    with open(fname, "r") as f:
-        wordle_dict = json.load(f)
+    """
+    load_wordle_dict
+    """
+    with open(fname, "r", encoding="utf-8") as file_obj:
+        wordle_dict = json.load(file_obj)
     answers = wordle_dict["answers"]
     allowed = wordle_dict["answers"] + wordle_dict["allowed"]
     return allowed, answers
 
 
 def filter_word_list(word_list, word_filter=None):
+    """
+    filter_word_list
+    """
     if word_filter:
         return list(filter(word_filter, word_list))
     return word_list
@@ -246,7 +302,7 @@ app = typer.Typer()
 
 
 @app.command()
-def main(
+def main(  # pylint: disable=too-many-arguments
     length: int = typer.Option(
         5,
         "--length",

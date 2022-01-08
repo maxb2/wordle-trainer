@@ -1,3 +1,6 @@
+# pylint: disable=missing-docstring
+# pylint: disable=too-many-lines
+
 wordle_dictionary = {
     "answers": [
         "cigar",
